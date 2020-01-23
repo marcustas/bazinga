@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block content %}
+    <h2>Hello, {{ user.first_name|capfirst }}!</h2>
+    <form method="post">{% csrf_token %}
+        {{ form.as_p }}
+        <input class="btn btn-lg btn-success" type="submit" value="Set">
+    </form>
+{% endblock content %}

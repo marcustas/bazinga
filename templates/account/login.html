@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load account %}
+{% load static %}
+
+
+{% block content %}
+<section class="auth-section">
+    <form class="login" method="POST" action="{% url 'account_login' %}">
+        {% csrf_token %}
+        <div class="input-block">
+            <div class="login-input">
+                <input name="login" placeholder="{% trans "Login" %}" autofocus="autofocus" required="" id="id_login">
+            </div>
+            <div class="login-input">
+                <input type="password" name="password" placeholder="{% trans "Password" %}" required="" id="id_password">
+            </div>
+        </div>
+        <div class="buttons-block">
+             {% if redirect_field_value %}
+              <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+              {% endif %}
+              <button class="login-buttons primaryAction" type="submit">{% trans "LOGIN" %}</button>
+        </div>
+    </form>
+</section>
+{% endblock %}
