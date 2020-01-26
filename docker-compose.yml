@@ -1,0 +1,71 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=bazinga_user
+      - POSTGRES_PASSWORD=bazinga_pass
+      - POSTGRES_DB=bazinga
+    volumes:
+      - ./database/postgres:/var/lib/postgresql
+
+  web:
+    build: .
+    command: bash -c "
+      pip install -r requirements/base.txt;
+      python manage.py migrate;
+      python manage.py runserver 0.0.0.0:8000;
+      "
+    depends_on:
+      - postgres
+    container_name: bazinga
+    volumes:
+      - .:/bazinga
+    ports:
+      - 8000:8000
+
+  redis:
+    container_name: redis
+    image: bitnami/redis:5.0
+    ports:
+      - 127.0.0.1:6379:6379
+    volumes:
+      - ./data/redis:/data
+    command: ["redis-server", "--bind", "redis", "--port", "6379"]
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+
+  celery:
+    container_name: celery
+    build: .
+    command: celery worker -A bazinga --loglevel=DEBUG
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+
+  celery_beat:
+    container_name: celery_beat
+    build: .
+    command: celery -A bazinga beat --loglevel=DEBUG --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+
+  flower:
+    image: mher/flower
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - FLOWER_PORT=8888
+    ports:
+      - 8888:8888

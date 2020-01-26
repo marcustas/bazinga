@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 import environ
+import datetime
+
+from celery.schedules import crontab
 
 env = environ.Env(
     SILK_PROFILE=(bool, False),
@@ -47,7 +50,6 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     'tinymce',
-    'django_celery_results',
     'django_celery_beat',
     'allauth',
     'allauth.account',
@@ -96,23 +98,17 @@ WSGI_APPLICATION = 'bazinga.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'bazinga',
-        'USER': 'bazinga_user',
-        'PASSWORD': 'bazinga_pass',
-        'HOST': 'localhost',
-        'PORT': '',
+        'NAME': env('POSTGRES_DB', default='bazinga'),
+        'USER': env('POSTGRES_USER', default='bazinga_user'),
+        'PASSWORD': env('POSTGRES_PASSWORD', default='bazinga_pass'),
+        'HOST': env('POSTGRES_HOST', default='postgres'),
+        'PORT': env('POSTGRES_PORT', default='5432'),
     }
 }
+
 # DATABASES['default']['ATOMIC_REQUESTS'] = True
 
 # Password validation
@@ -172,14 +168,21 @@ AUTHENTICATION_BACKENDS = (
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = env('DJANGO_DEFAULT_FROM_EMAIL', default='bazinga@mail.you>')
 
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_TIMEZONE = "Asia/Tel_Aviv"
-CELERY_BROKER_URL = 'redis://localhost:6379'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+BROKER_URL = env('BROKER_URL', default='redis://redis:6379/0')
+REDIS_URL = env('REDIS_URL', default='redis://redis:6379/0')
+CELERY_TIMEZONE = "Europe/Kiev"
+CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://redis:6379/0')
+CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default='redis://redis:6379/0')
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 
+CELERY_BEAT_SCHEDULE = {
+    'prepare-tomorrow-tasks': {
+        'task': 'main.tasks.schedule_tomorrow_emails',
+        'schedule': crontab(hour=23),
+    }
+}
 
 ACCOUNT_ALLOW_REGISTRATION = False
 ACCOUNT_LOGIN_ON_PASSWORD_RESET = True

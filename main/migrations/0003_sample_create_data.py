@@ -2,14 +2,24 @@
 from __future__ import unicode_literals
 import datetime
 import random
-from django.utils import timezone
 
+from django.utils import timezone
+from django.conf import settings
 from django.db import migrations, models
+
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
 from main.models import Baz, User, Target
 
 
 def add_data(apps, schema_editor):
+    User.objects.create_user(
+        username="SuperBazinga",
+        email="super_bazinga@mail.me",
+        password='bazinga1234',
+        is_superuser=True,
+        is_staff=True
+    )
     for i in range(10):
         Baz.objects.create(
             title="Baz title #{}".format(i),
@@ -30,7 +40,7 @@ def add_data(apps, schema_editor):
             target = Target(
                 customer=customer,
                 weekday=random.randrange(5),
-                email='target_{}@mail.me'.format(i),
+                email='Customer #{} Target_{}@mail.me'.format(customer.id, i),
                 email_time=email_time
             )
             targets.append(target)

@@ -63,6 +63,8 @@ class SentBaz(models.Model):
         'main.Target', verbose_name=_("Target"), on_delete=models.CASCADE, related_name='sent_bazes'
     )
     timestamp = models.DateTimeField(_('Sent datetime'))
+    successful = models.BooleanField(_('Is email sending was successful'), default=False)
+    error_message = models.TextField(_('Error message'), null=True, blank=True)
 
     def __str__(self):
         return "Sent {} to {}".format(self.baz, self.target)
