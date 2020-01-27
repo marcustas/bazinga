@@ -18,12 +18,11 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
 
-from main.views import TestView, SetIntervalView, ThankYouView
+from main.views import SetIntervalView, ThankYouView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('tinymce/', include('tinymce.urls')),
-    path('test/', TestView.as_view(), name='test'),
     path('', SetIntervalView.as_view(), name='set-interval'),
     path('thank-you/', ThankYouView.as_view(), name='thank-you'),
     path('accounts/', include('allauth.urls')),

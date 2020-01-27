@@ -32,7 +32,7 @@ class Command(BaseCommand):
             msg.send()
         except SMTPException as e:
             SentBaz.objects.get_or_create(
-                baz=Baz(id=target.planned_baz),
+                baz=baz,
                 target=target,
                 timestamp=timezone.now(),
                 successful=False,

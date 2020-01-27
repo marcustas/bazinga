@@ -19,6 +19,8 @@ services:
     command: bash -c "
       pip install -r requirements/base.txt;
       python manage.py migrate;
+      coverage run manage.py test --settings=bazinga.settings;
+      coverage report --omit='*migrations*,*test*,*manage.py*,*settings*,*asgi.py,*__init__*,*urls*';
       python manage.py runserver 0.0.0.0:8000;
       "
     depends_on:
@@ -47,7 +49,7 @@ services:
   celery:
     container_name: celery
     build: .
-    command: celery worker -A bazinga --loglevel=DEBUG
+    command: celery worker -A bazinga --loglevel=INFO
     restart: always
     depends_on:
       - postgres
@@ -56,7 +58,7 @@ services:
   celery_beat:
     container_name: celery_beat
     build: .
-    command: celery -A bazinga beat --loglevel=DEBUG --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: celery -A bazinga beat --loglevel=INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
     depends_on:
       - postgres
       - redis

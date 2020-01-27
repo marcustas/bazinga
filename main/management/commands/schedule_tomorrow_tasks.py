@@ -6,13 +6,10 @@ from django.db.models import F, Subquery, OuterRef, Count, ExpressionWrapper, In
 from django.db.models.functions import Coalesce
 from django.conf import settings
 
-from celery.utils.log import get_task_logger
-from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
 from main.models import Baz
 
-
-logger = get_task_logger(__name__)
 User = get_user_model()
 
 
