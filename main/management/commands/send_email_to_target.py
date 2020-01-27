@@ -40,7 +40,7 @@ class Command(BaseCommand):
             )
         else:
             SentBaz.objects.get_or_create(
-                baz=Baz(id=target.planned_baz),
+                baz=baz,
                 target=target,
                 timestamp=timezone.now(),
                 successful=True,

@@ -20,7 +20,7 @@ class Command(BaseCommand):
     help = 'Schedules email tasks for tomorrow.'
 
     def handle(self, *args, **options):
-        tomorrow = (datetime.date.today() + datetime.timedelta(days=3)).weekday()
+        tomorrow = (datetime.date.today() + datetime.timedelta(days=1)).weekday()
         planned_bazes_qs = Baz.objects.exclude(
             sent_to_targets__target=OuterRef("id")
         ).only('sent_to_targets__target')
@@ -46,21 +46,16 @@ class Command(BaseCommand):
             ).order_by('count_sent')
             tomorrow_targets = [target for target in all_targets if target.weekday == str(tomorrow)]
             for target in tomorrow_targets:
-                # schedule, _ = CrontabSchedule.objects.get_or_create(
-                #     minute=target.email_time.minute,
-                #     hour=target.email_time.hour,
-                #     day_of_week=target.weekday,
-                #     day_of_month='*',
-                #     month_of_year='*',
-                #     timezone = settings.CELERY_TIMEZONE
-                # )
-                schedule, created = IntervalSchedule.objects.get_or_create(
-                    every=10,
-                    period=IntervalSchedule.SECONDS,
+                schedule, _ = CrontabSchedule.objects.get_or_create(
+                    minute=target.email_time.minute,
+                    hour=target.email_time.hour,
+                    day_of_week=target.weekday,
+                    day_of_month='*',
+                    month_of_year='*',
+                    timezone=settings.CELERY_TIMEZONE
                 )
                 new_task = PeriodicTask(
-                    interval=schedule,
-                    # crontab=schedule,
+                    crontab=schedule,
                     name='Send Bazinga to {}'.format(target.email),
                     task='main.tasks.send_email_task',
                     args=[target.id, target.planned_baz],
