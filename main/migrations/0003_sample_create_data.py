@@ -28,9 +28,10 @@ def add_data(apps, schema_editor):
     users = []
     for i in range(10):
         user = User.objects.create_user(
-            username='Customer #{}'.format(i),
+            username='Customer {}'.format(i),
             email='customer_{}@mail.me'.format(i),
-            password='bazinga1234'
+            password='bazinga1234',
+            interval=random.randint(1, 9)
         )
         users.append(user)
     targets = []
@@ -40,7 +41,7 @@ def add_data(apps, schema_editor):
             target = Target(
                 customer=customer,
                 weekday=random.randrange(5),
-                email='Customer #{} Target_{}@mail.me'.format(customer.id, i),
+                email='customer{}_target_{}@mail.me'.format(customer.id, i),
                 email_time=email_time
             )
             targets.append(target)

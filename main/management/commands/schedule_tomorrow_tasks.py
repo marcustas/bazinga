@@ -1,4 +1,5 @@
 import datetime
+import itertools
 
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
@@ -31,6 +32,8 @@ class Command(BaseCommand):
         periodic_tasks = []
         count_tasks = 0
         for customer in customers:
+            if customer.targets_once == 0:
+                continue
             all_targets = customer.user_targets.annotate(
                 planned_baz=Subquery(planned_bazes_qs.values('id')[:1]),
                 count_sent=Coalesce(Subquery(
@@ -41,7 +44,8 @@ class Command(BaseCommand):
                                .values('count')
                 ), 0)
             ).order_by('count_sent')
-            tomorrow_targets = [target for target in all_targets if target.weekday == str(tomorrow)]
+            all_targets = (target for target in all_targets if target.weekday == str(tomorrow))
+            tomorrow_targets = itertools.islice(all_targets, customer.targets_once)
             for target in tomorrow_targets:
                 schedule, _ = CrontabSchedule.objects.get_or_create(
                     minute=target.email_time.minute,
