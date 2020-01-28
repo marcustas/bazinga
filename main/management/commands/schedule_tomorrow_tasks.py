@@ -1,5 +1,4 @@
 import datetime
-import itertools
 
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
@@ -42,9 +41,8 @@ class Command(BaseCommand):
                                .annotate(count=Count('pk'))
                                .values('count')
                 ), 0)
-            ).order_by('count_sent')
-            all_targets = (target for target in all_targets if target.weekday == str(tomorrow))
-            tomorrow_targets = itertools.islice(all_targets, customer.targets_once)
+            ).order_by('count_sent')[:customer.targets_once]
+            tomorrow_targets = (target for target in all_targets if target.weekday == str(tomorrow))
             for target in tomorrow_targets:
                 schedule, _ = CrontabSchedule.objects.get_or_create(
                     minute=target.email_time.minute,
