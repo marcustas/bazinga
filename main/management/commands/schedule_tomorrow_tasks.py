@@ -18,6 +18,7 @@ class Command(BaseCommand):
     help = 'Schedules email tasks for tomorrow.'
 
     def handle(self, *args, **options):
+        PeriodicTask.objects.filter(enabled=False, one_off=True).delete()
         tomorrow = (datetime.date.today() + datetime.timedelta(days=1)).weekday()
         planned_bazes_qs = Baz.objects.exclude(
             sent_to_targets__target=OuterRef("id")
