@@ -28,12 +28,10 @@ class Command(BaseCommand):
             targets_count=Count('user_targets'),
             targets_once=ExpressionWrapper(
                 F('targets_count') / F('interval') + 1, output_field=IntegerField()),
-        )
+        ).exclude(targets_once=0)
         periodic_tasks = []
         count_tasks = 0
         for customer in customers:
-            if customer.targets_once == 0:
-                continue
             all_targets = customer.user_targets.annotate(
                 planned_baz=Subquery(planned_bazes_qs.values('id')[:1]),
                 count_sent=Coalesce(Subquery(
