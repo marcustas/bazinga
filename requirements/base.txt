@@ -4,7 +4,7 @@ psycopg2-binary==2.8.4
 django-tinymce==2.8.0
 pytz==2019.3
 sqlparse==0.3.0
-celery==4.4.0
+celery==5.2.2
 django-celery-beat==1.5.0
 flower==0.9.3
 django-environ==0.4.5
